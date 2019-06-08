@@ -146,7 +146,7 @@ def GetOperandValue(x, y):
 #-----------------------------------------------------------------------
 def r2_get_imagebase():
   #ep = ((int(r2.cmd("ieq"), 16) >> 24) << 24)
-  ep = int(r2.cmd("S.~[0]"), 16)
+  ep = int(r2.cmd("ia~baddr[1]"), 16)
   print "IMAGE BASE %s"%ep
   return ep
 
@@ -220,7 +220,7 @@ def diaphora_decode(x):
 #-----------------------------------------------------------------------
 def SegStart(ea):
   # Just return the segment's start address
-  return int(r2.cmd("S.~[0]"), 16)
+  return int(r2.cmd("iS.~1[3]"), 16)
 
 #-----------------------------------------------------------------------
 def GetFunctionFlags(fcn):
@@ -272,21 +272,25 @@ def GetInputFileMD5():
 #-----------------------------------------------------------------------
 def MinEA():
     addresses = []
-    r2_cmd_output = r2.cmd('S~:[6]')
+    r2_cmd_output = r2.cmd('iSq~[0]')
     r2_cmd_output = r2_cmd_output.splitlines()
     if len(r2_cmd_output) > 1:
         for i in range(0,len(r2_cmd_output)):
             addresses.append(int(r2_cmd_output[i],16))
         return min(addresses)
     else:
-        return int(r2.cmd('S~:[6]'),16)
+        return int(r2.cmd('iSq~[0]'),16)
 
 #-----------------------------------------------------------------------
 def MaxEA():
   # TODO: Return the maximum (read, last) address in the database.
   # For example, if the last segment in the program being analysed does
   # end at 0x401FFF, then, that's the maximum address.
-  return int(r2.cmd('S=~:-1[3]'), 16)
+
+  #get number of sections (use to index row in next command since -1
+  #no longer works as an index)
+  n = int(r2.cmd('iSq~?'))
+  return int(r2.cmd('iSq~:{}[1]'.format(n-1)), 16)
 
 def GetMnem(x):
   return r2.cmd('pi 1 @ %s'%(x)).split(' ')[0]
