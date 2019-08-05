@@ -74,6 +74,11 @@ def block_succs(addr):
   except:
     print("NO BASIC BLOCK AT %s"%(addr))
     return res
+  
+  if bb is not None and len(bb) == 0:
+    print("NO BASIC BLOCK AT %s"%(addr))
+    return res
+  
   bb = bb[0]
   try:
     res.append(int(bb["jump"]))
